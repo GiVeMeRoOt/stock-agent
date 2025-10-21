@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated, Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from dsp.agents.orchestrator_agent import OrchestratorAgent
 from dsp.config.settings import settings
@@ -15,6 +18,13 @@ from dsp.utils.types import StockPick
 
 app = FastAPI(title="Daily Stock Picker", version="0.1.0")
 _scheduler: AsyncIOScheduler | None = None
+
+# Set up template rendering for the lightweight UI bundled with the API. Using
+# a resolved absolute path prevents issues when the working directory changes
+# (e.g. during tests or deployments).
+_templates = Jinja2Templates(
+    directory=str(Path(__file__).resolve().parent / "templates")
+)
 
 
 async def get_orchestrator() -> OrchestratorAgent:
@@ -29,6 +39,19 @@ OrchestratorDep = Annotated[OrchestratorAgent, Depends(get_orchestrator)]
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request) -> HTMLResponse:
+    """Serve the stock picker UI."""
+
+    return _templates.TemplateResponse(
+        request,
+        "index.html",
+        {
+            "settings_timezone": settings.timezone,
+        },
+    )
 
 
 @app.get("/pick/today")

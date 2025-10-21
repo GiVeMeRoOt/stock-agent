@@ -9,6 +9,17 @@ from pathlib import Path
 
 import pytest
 import pytz
+
+# FastAPI relies on pydantic_core.__version__ which is missing in certain
+# stripped-down binary builds. Set it explicitly for deterministic tests.
+try:  # pragma: no cover - defensive guard for environments missing attribute
+    import pydantic_core  # type: ignore
+
+    if not hasattr(pydantic_core, "__version__"):
+        pydantic_core.__version__ = "2.41.4"
+except Exception:  # pragma: no cover - best effort shim
+    pass
+
 from fastapi.testclient import TestClient
 
 # Configure environment before importing project modules
@@ -83,6 +94,23 @@ def test_api_pick_today(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
     assert captured_dates, "Orchestrator should receive the computed date"
     expected_date = real_datetime.now(pytz.timezone(settings.timezone)).date()
     assert captured_dates[0] == expected_date
+
+
+def test_ui_homepage_renders(tmp_path: Path) -> None:
+    """Ensure the HTML front-end renders with the configured timezone."""
+
+    os.environ["DATA_DIR"] = str(tmp_path)
+    os.environ["DB_URL"] = f"sqlite+aiosqlite:///{tmp_path}/dsp.db"
+    os.environ["ENVIRONMENT"] = "test"
+
+    client = TestClient(app)
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Daily Stock Picker" in response.text
+    assert settings.timezone in response.text
+    assert "Start Analysis" in response.text
+    assert "Logs" in response.text
 
 
 def test_cli_output_contains_disclaimer(tmp_path: Path) -> None:

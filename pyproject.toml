@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daily-stock-picker"
+version = "0.1.0"
+description = "Agentic NSE daily stock picker"
+readme = "README.md"
+authors = [{name = "Daily Stock Picker", email = "dev@example.com"}]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "sqlalchemy>=2.0",
+    "alembic>=1.12",
+    "httpx>=0.25",
+    "pandas>=2.1",
+    "numpy>=1.24",
+    "apscheduler>=3.10",
+    "pytz",
+    "aiosqlite",
+    "tenacity>=8.2",
+    "beautifulsoup4>=4.12",
+    "lxml",
+    "loguru",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx[http2]",
+    "ruff",
+    "black",
+    "pre-commit",
+]
+
+[project.urls]
+Homepage = "https://example.com"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101"]
+
+[tool.ruff.isort]
+known-first-party = ["dsp"]
+

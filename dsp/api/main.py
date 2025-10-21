@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Annotated, Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -11,6 +10,7 @@ from fastapi import Depends, FastAPI
 from dsp.agents.orchestrator_agent import OrchestratorAgent
 from dsp.config.settings import settings
 from dsp.scheduler.jobs import start_scheduler
+from dsp.utils.dates import current_market_date
 from dsp.utils.types import StockPick
 
 app = FastAPI(title="Daily Stock Picker", version="0.1.0")
@@ -33,7 +33,7 @@ async def health() -> dict[str, str]:
 
 @app.get("/pick/today")
 async def pick_today(orchestrator: OrchestratorDep) -> dict[str, Any]:
-    today = datetime.now().date()
+    today = current_market_date()
     pick = await orchestrator.run_daily_pick(today)
     return _serialize_pick(pick)
 

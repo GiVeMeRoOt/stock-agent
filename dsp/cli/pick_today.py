@@ -7,6 +7,7 @@ import asyncio
 from datetime import date, datetime
 
 from dsp.agents.orchestrator_agent import OrchestratorAgent
+from dsp.utils.dates import current_market_date
 
 
 async def _run(for_date: date) -> str:
@@ -34,14 +35,15 @@ def main() -> None:
         "--date",
         type=str,
         help=(
-            "Date to run the pick for (YYYY-MM-DD). Defaults to today in Asia/Kolkata."
+            "Date to run the pick for (YYYY-MM-DD). Defaults to today in the "
+            "configured timezone."
         ),
     )
     args = parser.parse_args()
     if args.date:
         for_date = datetime.fromisoformat(args.date).date()
     else:
-        for_date = datetime.now().date()
+        for_date = current_market_date()
     markdown = asyncio.run(_run(for_date))
     print(markdown)
 

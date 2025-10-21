@@ -45,6 +45,12 @@ Homepage = "https://example.com"
 [tool.setuptools.packages.find]
 where = ["."]
 
+[tool.setuptools.package-data]
+"dsp" = [
+    "api/templates/*.html",
+    "api/templates/**/*.html",
+]
+
 [tool.black]
 line-length = 88
 target-version = ["py311"]

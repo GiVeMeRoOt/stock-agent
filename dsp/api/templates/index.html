@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily Stock Picker</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-gradient-start: #0f172a;
+        --bg-gradient-end: #1e293b;
+        --card-bg: rgba(15, 23, 42, 0.85);
+        --card-border: rgba(148, 163, 184, 0.25);
+        --accent: #38bdf8;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5f5;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
+        color: var(--text-primary);
+      }
+
+      main {
+        width: min(900px, 92vw);
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 5vw, 3.4rem);
+        letter-spacing: -0.04em;
+        margin: 0;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 2rem;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(18px);
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        align-self: flex-start;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--accent);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .metric {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .metric-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .metric-value {
+        font-size: 2.1rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .confidence {
+        display: inline-block;
+        padding: 0.5rem 0.9rem;
+        border-radius: 14px;
+        background: rgba(56, 189, 248, 0.2);
+        color: var(--accent);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 1.1rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+      }
+
+      .list {
+        display: grid;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 12px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.9rem;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .feature-card {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 12px;
+        padding: 0.85rem;
+        display: grid;
+        gap: 0.25rem;
+      }
+
+      .feature-key {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .feature-value {
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        font-size: 1rem;
+      }
+
+      .rationale {
+        line-height: 1.7;
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+      }
+
+      .footer {
+        text-align: center;
+        color: rgba(148, 163, 184, 0.6);
+        font-size: 0.8rem;
+        margin-top: 1rem;
+      }
+
+      .loading {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .loading.active {
+        display: inline-flex;
+      }
+
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 3px solid rgba(148, 163, 184, 0.35);
+        border-top-color: var(--accent);
+        animation: spin 0.9s linear infinite;
+      }
+
+      .error {
+        border: 1px solid rgba(248, 113, 113, 0.55);
+        background: rgba(248, 113, 113, 0.12);
+        color: #fecaca;
+        border-radius: 12px;
+        padding: 0.8rem 1rem;
+        display: none;
+      }
+
+      .error.active {
+        display: block;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 2rem 0;
+        }
+
+        .card {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="pill">Daily Signal • {{ settings_timezone }}</div>
+        <h1>Daily Stock Picker</h1>
+        <p class="subtitle">
+          A focused market research agent selecting one high-conviction NSE stock every
+          trading day.
+        </p>
+      </header>
+
+      <section class="card" aria-live="polite">
+        <div class="loading" id="loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Fetching today's recommendation…</span>
+        </div>
+
+        <div class="error" id="error" role="alert"></div>
+
+        <div class="grid">
+          <div class="metric">
+            <span class="metric-label">Symbol</span>
+            <span class="metric-value" id="symbol">—</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Market Date</span>
+            <span class="metric-value" id="date">—</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Confidence</span>
+            <span class="confidence" id="confidence">—</span>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="section-title">Rationale</h2>
+          <p class="rationale" id="rationale">Detailed commentary arrives once the agent completes its analysis.</p>
+        </div>
+
+        <div>
+          <h2 class="section-title">Constraints</h2>
+          <ul class="list" id="constraints"></ul>
+        </div>
+
+        <div>
+          <h2 class="section-title">Key Signals</h2>
+          <div class="features-grid" id="features"></div>
+        </div>
+
+        <p class="footer" id="disclaimer"></p>
+      </section>
+    </main>
+
+    <script>
+      const loadingEl = document.getElementById("loading");
+      const errorEl = document.getElementById("error");
+      const symbolEl = document.getElementById("symbol");
+      const dateEl = document.getElementById("date");
+      const confidenceEl = document.getElementById("confidence");
+      const rationaleEl = document.getElementById("rationale");
+      const constraintsEl = document.getElementById("constraints");
+      const featuresEl = document.getElementById("features");
+      const disclaimerEl = document.getElementById("disclaimer");
+
+      const formatPercent = (value) => {
+        if (typeof value !== "number" || Number.isNaN(value)) {
+          return "N/A";
+        }
+        return `${Math.round(value * 100)}% confidence`;
+      };
+
+      const toTitle = (value) =>
+        value
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+
+      const renderList = (items) => {
+        constraintsEl.innerHTML = "";
+        if (!Array.isArray(items) || !items.length) {
+          const fallback = document.createElement("li");
+          fallback.className = "chip";
+          fallback.textContent = "No constraints surfaced.";
+          constraintsEl.appendChild(fallback);
+          return;
+        }
+        for (const item of items) {
+          const li = document.createElement("li");
+          li.className = "chip";
+          li.textContent = item;
+          constraintsEl.appendChild(li);
+        }
+      };
+
+      const renderFeatures = (features) => {
+        featuresEl.innerHTML = "";
+        if (!features || typeof features !== "object") {
+          featuresEl.textContent = "Signals unavailable.";
+          return;
+        }
+        const entries = Object.entries(features).slice(0, 12);
+        if (!entries.length) {
+          featuresEl.textContent = "Signals unavailable.";
+          return;
+        }
+        for (const [key, value] of entries) {
+          const card = document.createElement("article");
+          card.className = "feature-card";
+
+          const label = document.createElement("span");
+          label.className = "feature-key";
+          label.textContent = toTitle(String(key));
+
+          const val = document.createElement("span");
+          val.className = "feature-value";
+          val.textContent = typeof value === "number" ? value.toFixed(3) : value;
+
+          card.append(label, val);
+          featuresEl.appendChild(card);
+        }
+      };
+
+      const setLoading = (isLoading) => {
+        loadingEl.classList.toggle("active", isLoading);
+      };
+
+      const showError = (message) => {
+        errorEl.textContent = message;
+        errorEl.classList.add("active");
+      };
+
+      const clearError = () => {
+        errorEl.classList.remove("active");
+        errorEl.textContent = "";
+      };
+
+      const fetchPick = async () => {
+        setLoading(true);
+        clearError();
+        try {
+          const response = await fetch("/pick/today", { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`Unable to load pick (HTTP ${response.status}).`);
+          }
+          const payload = await response.json();
+          symbolEl.textContent = payload.symbol ?? "—";
+          dateEl.textContent = payload.date ?? "—";
+          confidenceEl.textContent = formatPercent(payload.confidence);
+          rationaleEl.textContent = payload.rationale ?? "Analysis not available.";
+          renderList(payload.constraints);
+          renderFeatures(payload.features);
+          disclaimerEl.textContent = payload.disclaimer ?? "Not investment advice.";
+        } catch (error) {
+          console.error(error);
+          showError(
+            error instanceof Error
+              ? error.message
+              : "Unexpected error while contacting the API."
+          );
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      document.addEventListener("DOMContentLoaded", fetchPick);
+    </script>
+  </body>
+</html>

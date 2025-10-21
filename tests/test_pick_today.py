@@ -85,6 +85,21 @@ def test_api_pick_today(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
     assert captured_dates[0] == expected_date
 
 
+def test_ui_homepage_renders(tmp_path: Path) -> None:
+    """Ensure the HTML front-end renders with the configured timezone."""
+
+    os.environ["DATA_DIR"] = str(tmp_path)
+    os.environ["DB_URL"] = f"sqlite+aiosqlite:///{tmp_path}/dsp.db"
+    os.environ["ENVIRONMENT"] = "test"
+
+    client = TestClient(app)
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Daily Stock Picker" in response.text
+    assert settings.timezone in response.text
+
+
 def test_cli_output_contains_disclaimer(tmp_path: Path) -> None:
     os.environ["DATA_DIR"] = str(tmp_path)
     os.environ["DB_URL"] = f"sqlite+aiosqlite:///{tmp_path}/dsp.db"

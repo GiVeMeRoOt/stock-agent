@@ -11,6 +11,7 @@ authors = [{name = "Daily Stock Picker", email = "dev@example.com"}]
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
+    "Jinja2>=3.1",
     "uvicorn[standard]",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
